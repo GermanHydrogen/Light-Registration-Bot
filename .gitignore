@@ -1,0 +1,7 @@
+*.log
+**/.idea
+**/config.*
+**/__pycache__
+**/venv/
+
+**/guildConfig.yml
