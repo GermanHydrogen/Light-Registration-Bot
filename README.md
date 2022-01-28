@@ -11,8 +11,6 @@ This bot is part of the german multi-gaming discord community [Rosenrudel](https
 - Easy slotlist creation and management for event builders
 - Easy registration to slot-based Events for normal users
 
----
-
 ## Usage
 - [For users](https://github.com/GermanHydrogen/Light-Registration-Bot/wiki/User-Usage)
 - [For admins](https://github.com/GermanHydrogen/Light-Registration-Bot/wiki/Admin-Usage)
