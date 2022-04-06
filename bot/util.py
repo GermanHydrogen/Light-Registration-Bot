@@ -7,14 +7,14 @@ from discord.ext import commands
 from discord.ext.commands import errors as derrors
 
 
-async def send_msg(ctx: discord.ext.commands.Context, error_msg: str) -> None:
+async def send_msg(ctx: discord.ApplicationContext, error_msg: str) -> None:
     """
     Sends an error msg to the author and in the channel of the message
     :param ctx: Message to reply to
     :param error_msg: Error message
     :return:
     """
-    await ctx.send(f'{ctx.message.author.mention} {error_msg}', delete_after=5)
+    await ctx.respond(f'{ctx.message.author.mention} {error_msg}', delete_after=5)
 
 
 def init_logger(path: str) -> logging.Logger:
@@ -58,40 +58,34 @@ class Util(commands.Cog):
         self.cfg = cfg
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        if ctx.message.channel != "DMChannel" and ctx.message.channel != "GroupChannel":
-            try:
-                await ctx.message.delete()
-            except discord.errors.NotFound:
-                pass
-            except discord.errors.Forbidden:
-                pass
+    async def on_application_command_error(self, ctx, error):
 
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(ctx.message.author.mention + " " + str(error), delete_after=error.retry_after + 1)
+            await ctx.respond(str(error), delete_after=error.retry_after + 1)
         elif isinstance(error, derrors.CommandNotFound):
-            await send_msg(ctx, "Command not found! Check **!help** for all commands")
+            await ctx.respond("Command not found! Check **!help** for all commands", delete_after=5)
         elif isinstance(error, derrors.MissingRequiredArgument):
-            await send_msg(ctx, f"Arguments are missing! Check **!help {ctx.command}** for correct usage")
+            await ctx.respond(f"Arguments are missing! Check **!help {ctx.command}** for correct usage", delete_after=5)
         elif isinstance(error, derrors.BadBoolArgument):
-            await send_msg(ctx, f"The given boolean is argument is faulty! Check **!help {ctx.command}** for correct "
-                                f"usage ")
+            await ctx.respond(f"The given boolean is argument is faulty! Check **!help {ctx.command}** for correct "
+                                f"usage ", delete_after=5)
+
         elif isinstance(error.original, discord.errors.Forbidden):
-            await ctx.message.author.send("The Bot is missing a permission. Please contact your local admin.")
+            await ctx.respond("The Bot is missing a permission. Please contact your local admin.", delete_after=5)
         elif isinstance(error, derrors.MissingRole):
-            await send_msg(ctx, f"You are missing the configured {error.missing_role}.")
+            await ctx.respond(f"You are missing the configured {error.missing_role}.", delete_after=5)
 
         elif hasattr(error, 'original') and hasattr(error.original, 'custom'):
-            await send_msg(ctx, error.original.message)
+            await ctx.respond(error.original.message, delete_after=5)
 
             if error.original.author_message != "":
-                await ctx.author.send(error.original.author_message)
+                await ctx.author.send(error.original.author_message, delete_after=5)
         else:
-            await send_msg(ctx, "Unexpected error. Please contact your local admin.")
+            await ctx.respond("Unexpected error. Please contact your local admin.", delete_after=5)
 
-        log = "User: " + str(ctx.message.author).ljust(20) + "\t"
-        log += "Channel:" + str(ctx.message.channel).ljust(20) + "\t"
-        log += "Command: " + str(ctx.message.content).ljust(20) + "\t"
+        log = "User: " + str(ctx.author).ljust(20) + "\t"
+        log += "Channel:" + str(ctx.channel).ljust(20) + "\t"
+        log += "Command: " + str(ctx.command).ljust(20) + "\t"
         log += str(error)
 
         self.logger.error(log)
@@ -105,20 +99,3 @@ class Util(commands.Cog):
 
         self.logger.info("Server Started")
         print("Server started.")
-
-
-class CustomHelp(discord.ext.commands.DefaultHelpCommand):
-    def __init__(self):
-        super(CustomHelp, self).__init__()
-
-    async def send_pages(self) -> None:
-        destination = self.get_destination()
-        for page in self.paginator.pages:
-            await destination.send(page)
-        try:
-            await self.context.message.delete()
-        except discord.Forbidden:
-            pass
-
-    def get_destination(self):
-        return self.context.author

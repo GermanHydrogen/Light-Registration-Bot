@@ -7,14 +7,14 @@ from commands.user import User
 from commands.moderator import Moderator
 from commands.objects.state import ClientState
 from commands.objects.guildconfig import RoleConfig
-from util import Util, CustomHelp, init_logger
+from util import Util, init_logger
 
 from config.loader import cfg
 
 path = os.path.dirname(os.path.abspath(__file__))
 
 # Bot definition
-client = Bot(command_prefix=cfg['prefix'], help_command=CustomHelp(), case_insensitive=True)
+client = Bot(command_prefix=cfg['prefix'], case_insensitive=True)
 
 # Get logger
 logger = init_logger(path)

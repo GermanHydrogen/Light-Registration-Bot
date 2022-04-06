@@ -2,6 +2,7 @@ import os
 import yaml
 from functools import wraps
 import discord
+from discord import Role
 from discord.ext.commands import errors as derrors
 
 from util import CustomParentException
@@ -25,6 +26,7 @@ class RoleNotFound(CustomParentException):
     """
     Raised if a configured role is invalid
     """
+
     def __init__(self, game: str, type: str):
         super().__init__()
         self.message = f"The set {type} role for {game} is invalid. Please contact your local admin"
@@ -34,6 +36,7 @@ class CannotAddRole(CustomParentException):
     """
     Raised if a configured role is invalid
     """
+
     def __init__(self):
         super().__init__()
         self.message = f"Cannot add role, because the role is higher in the hierarchy as the bot!"
@@ -43,6 +46,7 @@ class InvalidRole(CustomParentException):
     """
     Raised if a configured role is invalid
     """
+
     def __init__(self, role):
         super().__init__()
         self.message = f"Could not add {role}. Please contact your local admin"
@@ -52,29 +56,25 @@ class InvalidGameConfig(CustomParentException):
     """
     Raised if a configured role is invalid
     """
+
     def __init__(self):
         super().__init__()
         self.message = f"Invalid config. If you want soft lock mode, then please give a newbie role." \
                        f"If you want to "
 
 
-def validate_role(client: discord.Client, guild: discord.Guild, role_name: str, overwrite=False) -> discord.Role:
+def validate_role(client: discord.Client, guild: discord.Guild, role: Role, overwrite=False) -> None:
     """
     Gets the role object from the id and validates if the role is settable by the bot
     :param client: Bot client
     :param guild: Guild of the role
-    :param role_name: Role name of the role to get
+    :param role: Role
     :param overwrite: Overwrites the position check
     :return:
     """
-    if (role := discord.utils.get(guild.roles, name=role_name)) is None:
-        return None
-
     client_member = guild.get_member(client.user.id)
     if client_member.top_role.position < role.position and not overwrite:
         raise CannotAddRole
-
-    return role
 
 
 class GuildConfig:
@@ -119,6 +119,7 @@ class RoleConfig(GuildConfig):
                 required: <required_role_id>
                 newbie: <newbie_role_id>
     """
+
     def __add_structure(self, guild: discord.guild) -> None:
         """
         Adds the basic config structure for a guild
@@ -131,7 +132,8 @@ class RoleConfig(GuildConfig):
         self.data[guild.id] = {'moderator_role': 0, 'admin_role': 0, 'games': {}}
         self.write()
 
-    def set_game(self, client: discord.Client, guild: discord.Guild, game: str, required: str, newbie=None, soft=False) -> None:
+    def set_game(self, client: discord.Client, guild: discord.Guild, game: str, required: Role, newbie: Role = None,
+                 soft=False) -> None:
         """
         Adds the basic config structure for a game
         :param client: Bot client
@@ -150,47 +152,53 @@ class RoleConfig(GuildConfig):
             self.data[guild.id]['games'][game]['soft'] = soft
 
         if required is not None:
-            required = validate_role(client, guild, required)
+            validate_role(client, guild, required)
             self.data[guild.id]['games'][game]['required'] = required.id
 
         if newbie is not None:
-            newbie = validate_role(client, guild, newbie)
+            validate_role(client, guild, newbie)
             self.data[guild.id]['games'][game]['newbie'] = newbie.id
         elif (newbie is None and soft) or (newbie is not None and not soft):
             raise InvalidGameConfig
 
         self.write()
 
-    def set_moderator_role(self, client: discord.Client, guild: discord.guild, role_name: str) -> discord.Role:
+    def set_moderator_role(self, client: discord.Client, guild: discord.guild, role: Role = None):
         """
         Sets the moderator role for a guild.
         :param client: Bot client
         :param guild: Guild to add the config to
-        :param role_name: Role id of the role to add
+        :param role: Role to add
         :return: Role object which was found for the given id
         """
-        role = validate_role(client, guild, role_name, True)
-        self.__add_structure(guild)
 
-        self.data[guild.id]['moderator_role'] = role.id
+        if role is None:
+            self.__add_structure(guild)
+            self.data[guild.id]['moderator_role'] = 0
+        else:
+            validate_role(client, guild, role, True)
+            self.__add_structure(guild)
+
+            self.data[guild.id]['moderator_role'] = role.id
         self.write()
 
-        return role
-
-    def set_admin_role(self, client: discord.Client, guild: discord.guild, role_name: str) -> discord.Role:
+    def set_admin_role(self, client: discord.Client, guild: discord.guild, role: Role = None):
         """
         Sets the admin role for a guild.
         :param client: Bot client
         :param guild: Guild to add the config to
-        :param role_name: Role id of the role to add
+        :param role: Role of the role to add
         :return: Role object which was found for the given id
         """
-        role = validate_role(client, guild, role_name, True)
-        self.__add_structure(guild)
+        if role is None:
+            self.__add_structure(guild)
+            self.data[guild.id]['admin_role'] = 0
+        else:
+            validate_role(client, guild, role, True)
+            self.__add_structure(guild)
 
-        self.data[guild.id]['admin_role'] = role.id
+            self.data[guild.id]['admin_role'] = role.id
         self.write()
-        return role
 
     def is_moderator(self, user: discord.Member) -> bool:
         """
@@ -208,7 +216,7 @@ class RoleConfig(GuildConfig):
             role_id = int(self.data[user.guild.id]['moderator_role'])
             return discord.utils.get(user.roles, id=role_id) is not None
 
-        except KeyError and ValueError:     # if no role is configured
+        except KeyError and ValueError:  # if no role is configured
             return False
 
     def is_administrator(self, user: discord.Member) -> bool:
@@ -287,6 +295,7 @@ class RoleConfig(GuildConfig):
         :param guild: Guild to return the config to
         :return:
         """
+
         def print_role(role_id: int, name: str) -> str:
             """
             Returns a string containing the state of the role
@@ -334,6 +343,7 @@ def is_moderator(func):
     :param func:
     :return:
     """
+
     @wraps(func)
     async def new_func(*args, **kwargs):
         guild_config = args[0].guildConfig
@@ -353,6 +363,7 @@ def is_administrator(func):
     :param func:
     :return:
     """
+
     @wraps(func)
     async def new_func(*args, **kwargs):
         guild_config = args[0].guildConfig

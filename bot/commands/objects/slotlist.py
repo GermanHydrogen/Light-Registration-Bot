@@ -1,10 +1,10 @@
 import discord
 import re
-from util import CustomParentException
-from commands.objects.slot import *
-from commands.objects.slotgroup import SlotGroup
+from bot.util import CustomParentException
+from bot.commands.objects.slot import *
+from bot.commands.objects.slotgroup import SlotGroup
 
-from config.loader import cfg
+from bot.config.loader import cfg
 
 
 async def get_list(channel: discord.TextChannel, author: discord.User, user: discord.User):
@@ -242,7 +242,7 @@ class SlotList:
             try:
                 return self.struct[int(name)]
             except KeyError:
-                pass
+                SlotGroupNotFound(name)
 
         if (group := next((x for x in self.struct if x.title.replace("**", "").replace("\n", " ").strip() == name), None)) is None:
             raise SlotGroupNotFound(name)
