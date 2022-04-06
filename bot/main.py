@@ -1,5 +1,6 @@
 import os
 
+import discord
 from discord.ext.commands import Bot
 
 from commands.admin import Admin
@@ -14,7 +15,9 @@ from config.loader import cfg
 path = os.path.dirname(os.path.abspath(__file__))
 
 # Bot definition
-client = Bot(command_prefix=cfg['prefix'], case_insensitive=True)
+intents = discord.Intents.default()
+intents.members = True
+client = Bot(command_prefix=cfg['prefix'], case_insensitive=True, intents=intents)
 
 # Get logger
 logger = init_logger(path)

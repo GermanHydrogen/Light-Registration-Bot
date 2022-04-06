@@ -94,7 +94,7 @@ class Util(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        game = discord.Game(name=f"Use: {self.cfg['prefix']} help")
+        game = discord.Game(name=f"Use: /help")
         await self.client.change_presence(activity=game)
 
         self.logger.info("Server Started")

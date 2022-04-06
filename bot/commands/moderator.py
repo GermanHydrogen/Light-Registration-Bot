@@ -3,7 +3,13 @@ from discord import slash_command, Option
 from discord.ext import commands
 
 from bot.commands.objects.guildconfig import RoleConfig, is_moderator
+from bot.commands.objects.slotlist import SlotlistNotFound
 from bot.commands.objects.state import ClientState
+
+
+async def get_member(ctx: discord.AutocompleteContext):
+    guild = ctx.interaction.guild
+    return [member.display_name for member in guild.members if member.display_name.startswith(ctx.value.lower())]
 
 
 class Moderator(commands.Cog):
@@ -16,6 +22,15 @@ class Moderator(commands.Cog):
 
         self.guildConfig = guild_config
 
+    async def get_slotted(self, ctx: discord.AutocompleteContext):
+        channel = ctx.interaction.channel
+        author = ctx.interaction.user
+        try:
+            slotlist = await self.state.get_slotlist(channel, author, self.client.user)
+        except SlotlistNotFound:
+            return []
+        return [elem for elem in slotlist.get_slotted() if elem.startswith(ctx.value.lower())]
+
     @slash_command()
     @is_moderator
     async def create(self, ctx):  # makes the slotlist editable for the bot
@@ -27,14 +42,12 @@ class Moderator(commands.Cog):
 
         await ctx.respond(f"The event **{channel.name}** was successfully created!", delete_after=10)
 
-    @slash_command()
+    @slash_command(guild_ids=[621724759645749258])
     @is_moderator
-    async def force_slot(self, ctx, slot_number: Option(int, "Slot number"), user_name: Option(str, "Username of the user to slot")):
+    async def force_slot(self, ctx, slot_number: Option(int, "Slot number"), user_name: Option(str, "User to slot", autocomplete=get_member)):
         """Registers a username for the given slot."""
         author = ctx.author
         channel = ctx.channel
-
-        print(type(user_name))
 
         slotlist = await self.state.get_slotlist(channel, author, self.client.user)
         slotlist.slot(slot_number, user_name)
@@ -44,7 +57,7 @@ class Moderator(commands.Cog):
 
     @slash_command()
     @is_moderator
-    async def force_unslot(self, ctx, user_name: Option(str, "Username of the user to unslot")):
+    async def force_unslot(self, ctx, user_name: Option(str, "Username of the user to unslot", autocomplete=get_slotted)):
         """Withdraws a given user from the event."""
         author = ctx.author
         channel = ctx.channel
@@ -53,7 +66,7 @@ class Moderator(commands.Cog):
         slotlist.unslot(user_name)
         await slotlist.write()
 
-        await ctx.respond(f'{author.mention} {user_name} was successfully slotted.', delete_after=5)
+        await ctx.respond(f'{author.mention} {user_name} was successfully unslotted.', delete_after=5)
 
     @slash_command()
     @is_moderator

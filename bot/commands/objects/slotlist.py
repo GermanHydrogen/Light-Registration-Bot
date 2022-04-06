@@ -319,6 +319,12 @@ class SlotList:
         else:
             hit.unslot_user(user_name)
 
+    def get_slotted(self) -> [str]:
+        """
+        :return: List of slotted users
+        """
+        return [elem.user for elem in self.slots if elem.user is not None]
+
     def manage_reserve(self) -> None:
         """
         Manage reserve slots.
