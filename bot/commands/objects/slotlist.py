@@ -1,10 +1,10 @@
 import discord
 import re
-from bot.util import CustomParentException
-from bot.commands.objects.slot import *
-from bot.commands.objects.slotgroup import SlotGroup
+from util import CustomParentException
+from commands.objects.slot import *
+from commands.objects.slotgroup import SlotGroup
 
-from bot.config.loader import cfg
+from config.loader import cfg
 
 
 async def get_list(channel: discord.TextChannel, author: discord.User, user: discord.User):

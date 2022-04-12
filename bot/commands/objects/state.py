@@ -2,7 +2,7 @@ import discord
 
 from functools import wraps
 
-from bot.commands.objects.slotlist import SlotList, get_list, get_channel_author, SlotlistNotFound
+from commands.objects.slotlist import SlotList, get_list, get_channel_author, SlotlistNotFound
 
 
 class ClientState:
