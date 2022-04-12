@@ -59,7 +59,6 @@ class Util(commands.Cog):
 
     @commands.Cog.listener()
     async def on_application_command_error(self, ctx, error):
-
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.respond(str(error), delete_after=error.retry_after + 1)
         elif isinstance(error, derrors.CommandNotFound):
@@ -72,8 +71,8 @@ class Util(commands.Cog):
 
         elif isinstance(error.original, discord.errors.Forbidden):
             await ctx.respond("The Bot is missing a permission. Please contact your local admin.", delete_after=5)
-        elif isinstance(error, derrors.MissingRole):
-            await ctx.respond(f"You are missing the configured {error.missing_role}.", delete_after=5)
+        elif isinstance(error.original, derrors.MissingRole):
+            await ctx.respond(f"You are missing a role to execute this command!", delete_after=5)
 
         elif hasattr(error, 'original') and hasattr(error.original, 'custom'):
             await ctx.respond(error.original.message, delete_after=5)
