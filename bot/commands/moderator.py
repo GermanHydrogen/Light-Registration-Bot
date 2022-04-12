@@ -42,7 +42,7 @@ class Moderator(commands.Cog):
 
         await ctx.respond(f"The event **{channel.name}** was successfully created!", delete_after=10)
 
-    @slash_command(guild_ids=[621724759645749258])
+    @slash_command()
     @is_moderator
     async def force_slot(self, ctx, slot_number: Option(int, "Slot number"), user_name: Option(str, "User to slot", autocomplete=get_member)):
         """Registers a username for the given slot."""
