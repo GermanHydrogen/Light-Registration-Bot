@@ -2,9 +2,9 @@ import discord
 from discord import slash_command, Option
 from discord.ext import commands
 
-from bot.commands.objects.guildconfig import RoleConfig, is_moderator
-from bot.commands.objects.slotlist import SlotlistNotFound
-from bot.commands.objects.state import ClientState
+from commands.objects.guildconfig import RoleConfig, is_moderator
+from commands.objects.slotlist import SlotlistNotFound
+from commands.objects.state import ClientState
 
 
 async def get_member(ctx: discord.AutocompleteContext):

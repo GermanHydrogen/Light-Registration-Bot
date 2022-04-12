@@ -3,8 +3,8 @@ from discord.ext import commands
 from discord import slash_command, Option
 from discord.types.role import Role
 
-from bot.commands.objects.state import ClientState
-from bot.commands.objects.guildconfig import RoleConfig, is_administrator
+from commands.objects.state import ClientState
+from commands.objects.guildconfig import RoleConfig, is_administrator
 
 
 class Admin(commands.Cog):

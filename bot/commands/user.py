@@ -2,9 +2,9 @@ import discord
 from discord import slash_command, Option
 
 from discord.ext import commands
-from bot.commands.objects.state import ClientState
-from bot.commands.objects.guildconfig import RoleConfig
-from bot.util import send_msg
+from commands.objects.state import ClientState
+from commands.objects.guildconfig import RoleConfig
+from util import send_msg
 
 
 class User(commands.Cog):
