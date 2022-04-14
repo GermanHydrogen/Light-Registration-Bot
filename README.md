@@ -1,6 +1,6 @@
 # Light-Registration-Bot
 A simple Discord Bot for managing registrations to events for your community. It's using the discord.py package by Rapptz.<br>
-You can invite the bot via: [Discord Invite](https://discord.com/api/oauth2/authorize?client_id=823277525525594162&permissions=268511232&scope=bot)
+You can invite the bot via: [Discord Invite](https://discord.com/api/oauth2/authorize?client_id=823277525525594162&permissions=275146451968&scope=bot%20applications.commands)
 
 Two versions are available for this Bot. The light variant doesn't require any additional software, medium requires an mysql database.<br>
 All light version features are also found in the medium version.
