@@ -50,7 +50,7 @@ class Moderator(commands.Cog):
         channel = ctx.channel
 
         slotlist = await self.state.get_slotlist(channel, author, self.client.user)
-        slotlist.slot(slot_number, user_name)
+        slotlist.slot(slot_number, user_name, True)
         await slotlist.write()
 
         await ctx.respond(f'{author.mention} {user_name} was successfully slotted.', delete_after=5)

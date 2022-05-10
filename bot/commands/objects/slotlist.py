@@ -293,17 +293,18 @@ class SlotList:
 
         self.struct.remove(group)
 
-    def slot(self, number: int, user_name: str) -> None:
+    def slot(self, number: int, user_name: str, force=False) -> None:
         """
         Slots a user
         :param number: Slot number
         :param user_name: User which should to be slotted
+        :param force: Ignores uniqueness of the user
         :return:
         """
         if (hit := next((x for x in self.slots + self.reserve if int(x.number) == int(number)), 0)) == 0:
             raise SlotNotFound(slot_number=str(number))
         else:
-            if (taken := next(((x for x in self.slots + self.reserve if x.user == user_name)), 0)) != 0:
+            if ((taken := next(((x for x in self.slots + self.reserve if x.user == user_name)), 0)) != 0) and not force:
                 taken.unslot_user(user_name)
 
             hit.slot_user(user_name)
