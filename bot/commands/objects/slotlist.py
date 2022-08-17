@@ -315,7 +315,7 @@ class SlotList:
         :param user_name: User which should be unslotted
         :return: None
         """
-        if (hit := next(((x for x in self.slots if x.user == user_name)), 0)) == 0:
+        if (hit := next(((x for x in (self.slots + self.reserve) if x.user == user_name)), 0)) == 0:
             raise UserNotSlotted
         else:
             hit.unslot_user(user_name)
@@ -324,7 +324,7 @@ class SlotList:
         """
         :return: List of slotted users
         """
-        return [elem.user for elem in self.slots if elem.user is not None]
+        return [elem.user for elem in (self.slots + self.reserve) if elem.user is not None]
 
     def manage_reserve(self) -> None:
         """
